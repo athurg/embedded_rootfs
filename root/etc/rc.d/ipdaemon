@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+#	IP精灵服务启动脚本
+#
+
+. /etc/rc.conf
+
+PID=$(pidof -o %PPID ipdaemon)
+
+case "$1" in
+	start)
+		printf "启动IP精灵\t\t\t"
+		[ -z "$PID" ] && /sbin/ipdaemon &
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/touch /var/run/daemon/ipdaemon
+			echo "成功"
+		fi
+		;;
+	stop)
+		printf "关闭IP精灵\t\t\t"
+		[ ! -z "$PID" ]  && kill $PID &> /dev/null
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/rm -f /var/run/daemon/ipdaemon
+			echo "成功"
+		fi
+		;;
+	restart)
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo "用法： $0 {start|stop|restart}"  
+esac
+exit 0
+
+# vim: set filetype=sh fileencoding=gbk :

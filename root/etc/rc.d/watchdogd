@@ -1,0 +1,45 @@
+#!/bin/sh
+
+. /etc/rc.conf
+
+PID=$(pidof -o %PPID watchdogd)
+feed_dog()
+{
+	while true ; do
+		/sbin/devmem 0xE2000003 8 0x5A
+		sleep 100
+	done
+}
+case "$1" in
+	start)
+		printf "启动硬件看门狗\t\t\t"
+		[ -z "$PID" ] && feed_dog &
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/touch /var/run/daemon/watchdogd
+			echo "成功"
+		fi
+		;;
+	stop)
+		printf "关闭硬件看门狗\t\t\t"
+		[ ! -z "$PID" ]  && kill $PID &> /dev/null
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/rm /var/run/daemon/watchdogd
+			echo "成功"
+		fi
+		;;
+	restart)
+		$0 stop
+		sleep 3
+		$0 start
+		;;
+	*)
+		echo "用法： $0 {start|stop|restart}"  
+esac
+
+exit 0
+
+# vim: set ft=sh fileencoding=gbk :

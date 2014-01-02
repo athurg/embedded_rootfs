@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+#	Telnet服务启动脚本
+#
+. /etc/rc.conf
+
+TELNETD_ARGS="-l /bin/login"
+PID=$(pidof -o %PPID telnetd)
+
+case "$1" in
+	start)
+		printf "启动telnet服务\t\t\t"
+		[ -z "$PID" ] && /sbin/telnetd ${TELNETD_ARGS}
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/touch /var/run/daemon/telnetd
+			echo "成功"
+		fi
+		;;
+	stop)
+		printf "停止telnet监控服务\t\t\t"
+		[ ! -z "$PID" ]  && kill $PID &> /dev/null
+		if [ $? -gt 0 ]; then
+			echo "失败"
+		else
+			/bin/rm -f /var/run/daemon/telnetd
+			echo "成功"
+		fi
+		;;
+	restart)
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo "用法： $0 {start|stop|restart}"  
+esac
+
+exit 0
+
+
+# vim: set filetype=sh fileencoding=gbk :

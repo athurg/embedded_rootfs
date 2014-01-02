@@ -1,0 +1,2 @@
+console::sysinit:/etc/rc.sysinit
+console::askfirst:-/bin/sh

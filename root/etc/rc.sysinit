@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# /etc/rc.sysinit : 系统初始化脚本
+#
+. /etc/rc.conf
+
+echo
+echo "芯通科技<http://www.nts-intl.com>"
+echo "---------------------------------"
+echo
+
+echo
+echo "挂载文件系统"
+mkdir -p /proc /sys /dev/pts /log /tmp /usr /lib/modules /var/run/daemon
+mount -n -t proc none /proc
+mount -n -t sysfs none /sys
+mdev -s
+echo '/sbin/mdev' > /proc/sys/kernel/hotplug
+mount -a
+
+echo
+echo "重载配置文件"
+[ -d /usr/root ] && cp -a /usr/root/* /
+. /etc/rc.conf
+
+hostname nts-intl.com
+
+if [ -d /modules ] ; then
+	echo
+	echo "加载驱动模块"
+	ln -s /modules /lib/modules/`uname -r`
+	for module in ${MODULES} ; do
+		modprobe ${module}
+	done
+fi
+
+echo
+for daemon in ${DAEMONS} ; do
+	/etc/rc.d/${daemon} start
+done
+
+if [ -f /etc/rc.local ] ; then
+	echo
+	echo "执行本地初始化"
+	. /etc/rc.local
+fi
+
+# vim: set ft=sh fileencoding=gbk :

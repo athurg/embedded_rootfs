@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+#	网络接口配置脚本
+#
+
+. /etc/rc.conf
+
+case "$1" in
+	start)
+		if [ -f /var/run/daemon/network ] ; then
+			echo "网络接口已加载，输入network restart重启"
+			exit
+		fi
+
+		printf "配置网络接口\t\t\t"
+		error=0
+		ifconfig lo up
+		ifconfig $MAC_ADDR || error=1
+		ifconfig $INTERFACE up || error=1
+		route add ${ROUTE} || error=1
+		if [ $error -eq 0 ]; then
+			/bin/touch /var/run/daemon/network
+			echo "成功"
+		else
+			echo "失败"
+		fi
+		;;
+	stop)
+		printf "卸载网络接口\t\t\t"
+		/bin/rm -f /var/run/daemon/network
+		error=0
+		ifconfig lo down
+		ifconfig $INTERFACE down || error=1
+		if [ $error -eq 0 ]; then
+			echo "完成"
+		else
+			echo "失败"
+		fi
+		;;
+	restart)
+		$0 stop
+		/bin/sleep 2
+		$0 start
+		;;
+	*)
+		echo "用法： $0 {start|stop|restart}"  
+esac
+
+# vim: fileencoding=gbk

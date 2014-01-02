@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+#	HTTP服务启动脚本
+#
+
+. /etc/rc.conf
+
+[ -f /etc/httpd.conf ] && HTTPD_ARGS="${HTTPD_ARGS} -c /etc/httpd.conf"
+[ -d /usr/www ] && HTTPD_ARGS="${HTTPD_ARGS} -h /usr/www/"
+PID=$(pidof -o %PPID httpd)
+
+case "$1" in
+	start)
+		printf "启动HTTPD服务\t\t\t"
+		[ -z "$PID" ] && /bin/httpd ${HTTPD_ARGS}
+		if [ $? -gt 0 ] ; then
+			echo "失败"
+		else
+			/bin/touch /var/run/daemon/httpd
+			echo "完成"
+		fi
+		;;
+	stop)
+		printf "停止HTTPD监控服务\t\t\t"
+		[ ! -z "$PID" ] && kill $PID &> /dev/null
+		if [ $? -gt 0 ] ; then
+			echo "失败"
+		else
+			/bin/rm -f /var/run/daemon/httpd
+			echo "完成"
+		fi
+		;;
+	restart)
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo "用法： $0 {start|stop|restart}"  
+esac
+
+exit 0
+
+# vim: set filetype=sh fileencoding=gbk :

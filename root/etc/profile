@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# /etc/profile : Shell≈‰÷√Œƒº˛
+#
+
+. /etc/rc.conf
+
+PS1="[NTS \W]$ "
+PATH=/bin:/sbin:/usr/bin:/usr/test:/usr/app
+export PS1 PATH
+
+alias t="tftp -g ${SERVER_IP} -r "
+alias up="tftp -g ${SERVER_IP} -r ${PRJ_NAME}/test.tgz -l /tmp/test.tgz && tar xvf /tmp/test.tgz -C /usr/bin/ && /usr/bin/autoupdate.sh"
+
+# vim: fileencoding=gbk :
